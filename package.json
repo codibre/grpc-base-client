@@ -1,10 +1,10 @@
 {
-  "name": "boilerplate-base",
-  "description": "This project is just a template for creation of new projects",
+  "name": "grpc-base-client",
+  "description": "This project is a Library base for construct gRPC clients",
   "version": "0.0.0",
-  "private": true,
+  "private": false,
   "author": {
-    "name": "Thiago O Santos <tos.oliveira@gmail.com>"
+    "name": "Gustavo S. Rodrigues <gustavo.beavis@gmail.com>"
   },
   "engines": {
     "node": ">=10"
@@ -62,14 +62,19 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/codibre/boilerplate-base.git"
+    "url": "https://github.com/Codibre/grpc-base-client.git"
   },
-  "homepage": "https://github.com/codibre/boilerplate-base#readme",
+  "homepage": "https://github.com/Codibre/grpc-base-client#readme",
   "bugs": {
-    "url": "https://github.com/codibre/boilerplate-base/issues"
+    "url": "https://github.com/Codibre/grpc-base-client/issues"
   },
   "keywords": [],
   "license": "MIT",
+  "peerDependencies": {
+    "grpc": "^1.0.0",
+    "@grpc/grpc-js": "^1.3.1",
+    "@grpc/proto-loader": "^0.6.2"
+  },
   "devDependencies": {
     "@codibre/confs": "^1.1.2",
     "@types/jest": "^27.4.1",
@@ -92,5 +97,9 @@
     "typedoc-plugin-markdown": "^3.11.14",
     "typescript": "^4.5.2"
   },
-  "dependencies": {}
+  "dependencies": {
+    "@grpc/grpc-js": "^1.3.1",
+    "@grpc/proto-loader": "^0.6.2",
+    "grpc": "^1.24.11"
+  }
 }
