@@ -1,3 +1,10 @@
+# 1.0.0 (2022-04-20)
+
+
+### Features
+
+* first gRPC client ([#1](https://github.com/Codibre/grpc-base-client/issues/1)) ([18a4e97](https://github.com/Codibre/grpc-base-client/commit/18a4e97c4845b40863314ec914f04859c0924567))
+
 # Changelog
   All notable changes to this project will be documented in this file.
 
