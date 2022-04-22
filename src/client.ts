@@ -8,7 +8,7 @@ import { Options as PackageOptions, loadSync } from '@grpc/proto-loader';
 import { ClientConfig } from './client-config';
 import { getGrpcLib } from './utils/get-grpc-lib';
 import { ClientPool } from './client-pool';
-import { overloadUnaryServices } from './utils/promisify-unary';
+import { overloadUnaryServices } from './utils/overload-unary-services';
 
 export type GrpcObject = GrpcObjectNew | GrpcObjectOld;
 
@@ -47,7 +47,7 @@ export class Client<T> {
 			}, grpcPackage)[config.service] as ServiceClientConstructor;
 
 		const client = new grpcDef(config.url, credentials, config.grpcOptions);
-		const grpcClient = overloadUnaryServices(grpcDef, client) as unknown as T;
+		const grpcClient = overloadUnaryServices(client) as unknown as T;
 		return grpcClient;
 	}
 
