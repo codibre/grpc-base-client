@@ -2,6 +2,17 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 
 import { overloadUnaryServices } from '../../../src/utils/overload-unary-services';
+afterEach(() => {
+	delete require.cache[
+		require.resolve('../../../src/utils/overload-unary-services')
+	];
+});
+
+it('should start things', () => {
+	require('../../../src/utils/overload-unary-services');
+
+	expect(jest.fn()).toHaveCallsLike();
+});
 
 describe(overloadUnaryServices.name, () => {
 	it('Should overload correct functions with promise and without promise', async () => {

@@ -1,13 +1,13 @@
 import { Client } from '../../src/client';
 import { ClientPool } from '../../src/client-pool';
 
-describe('index.ts', () => {
+describe('client.ts', () => {
 	afterEach(() => {
-		delete require.cache[require.resolve('../../src/index')];
+		delete require.cache[require.resolve('../../src/client')];
 	});
 
 	it('should start things', () => {
-		require('../../src/index');
+		require('../../src/client');
 
 		expect(jest.fn()).toHaveCallsLike();
 	});
@@ -16,7 +16,7 @@ describe('index.ts', () => {
 		Check(props: { service: string }): Promise<any>;
 	}
 
-	it('should test', async () => {
+	it('should Create a Client and exec a call with correct pool', async () => {
 		jest
 			.spyOn(Client.prototype, 'createClient' as any)
 			.mockImplementation(() => {
@@ -51,7 +51,7 @@ describe('index.ts', () => {
 		expect(pool[1].Check).toHaveCallsLike([{ service: '2' }]);
 	});
 
-	it('should test', async () => {
+	it('should Create a Client and exec a call with correct pool with another instance', async () => {
 		jest
 			.spyOn(Client.prototype, 'createClient' as any)
 			.mockImplementation(() => {
