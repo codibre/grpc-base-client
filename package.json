@@ -1,7 +1,7 @@
 {
   "name": "grpc-base-client",
   "description": "This project is a Library base for construct gRPC clients",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "private": false,
   "author": {
     "name": "Gustavo S. Rodrigues <gustavo.beavis@gmail.com>"

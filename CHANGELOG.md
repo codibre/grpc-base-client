@@ -1,3 +1,10 @@
+## [1.0.2](https://github.com/Codibre/grpc-base-client/compare/v1.0.1...v1.0.2) (2022-04-26)
+
+
+### Bug Fixes
+
+* Overload Unary call ([#3](https://github.com/Codibre/grpc-base-client/issues/3)) ([e5f2790](https://github.com/Codibre/grpc-base-client/commit/e5f2790c30dbf85119ad1544ee6de2f103c01661))
+
 ## [1.0.1](https://github.com/Codibre/grpc-base-client/compare/v1.0.0...v1.0.1) (2022-04-22)
 
 
