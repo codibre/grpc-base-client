@@ -1,16 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
-	GrpcObject as GrpcObjectNew,
+	GrpcObject,
+	loadPackageDefinition,
 	ServiceClientConstructor,
+	credentials as gRPCCredentials,
 } from '@grpc/grpc-js';
-import { GrpcObject as GrpcObjectOld } from 'grpc';
 import { Options as PackageOptions, loadSync } from '@grpc/proto-loader';
 import { ClientConfig } from './client-config';
-import { getGrpcLib } from './utils/get-grpc-lib';
 import { ClientPool } from './client-pool';
 import { overloadUnaryServices } from './utils/overload-unary-services';
-
-export type GrpcObject = GrpcObjectNew | GrpcObjectOld;
 
 export class Client<T> {
 	private packageDefinition!: GrpcObject;
@@ -30,9 +28,7 @@ export class Client<T> {
 
 	private createClient(config: ClientConfig): T {
 		const credentials =
-			getGrpcLib().credentials[
-				config.secure ? 'createSsl' : 'createInsecure'
-			]();
+			gRPCCredentials[config.secure ? 'createSsl' : 'createInsecure']();
 
 		const grpcPackage = this.loadPackage(
 			config.protoFile,
@@ -60,9 +56,7 @@ export class Client<T> {
 				...config,
 			};
 			const pkgDef = loadSync(address, conf);
-			this.packageDefinition = getGrpcLib().loadPackageDefinition(
-				pkgDef,
-			) as GrpcObject;
+			this.packageDefinition = loadPackageDefinition(pkgDef);
 		}
 		return this.packageDefinition;
 	}
