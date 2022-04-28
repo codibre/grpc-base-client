@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/Codibre/grpc-base-client/compare/v1.0.2...v1.1.0) (2022-04-28)
+
+
+### Features
+
+* Supports non Pool connection ([#4](https://github.com/Codibre/grpc-base-client/issues/4)) ([ea35a4d](https://github.com/Codibre/grpc-base-client/commit/ea35a4dc5120a625e0b1036e0cc688bbadd99e76))
+
 ## [1.0.2](https://github.com/Codibre/grpc-base-client/compare/v1.0.1...v1.0.2) (2022-04-26)
 
 
