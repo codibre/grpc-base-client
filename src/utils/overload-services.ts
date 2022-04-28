@@ -29,7 +29,7 @@ function promisifyUnary<P, R>(
 		);
 }
 
-export function overloadUnaryServices(client: ServiceClient): ServiceClient {
+export function overloadServices(client: ServiceClient): ServiceClient {
 	const services = Object.keys(client.__proto__);
 	services.forEach((serviceName) => {
 		const action = client[serviceName] as any;
