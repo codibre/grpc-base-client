@@ -1,20 +1,18 @@
 /* eslint-disable object-shorthand */
 /* eslint-disable @typescript-eslint/no-empty-function */
 
-import { overloadUnaryServices } from '../../../src/utils/overload-unary-services';
+import { overloadServices } from '../../../src/utils/overload-services';
 afterEach(() => {
-	delete require.cache[
-		require.resolve('../../../src/utils/overload-unary-services')
-	];
+	delete require.cache[require.resolve('../../../src/utils/overload-services')];
 });
 
 it('should start things', () => {
-	require('../../../src/utils/overload-unary-services');
+	require('../../../src/utils/overload-services');
 
 	expect(jest.fn()).toHaveCallsLike();
 });
 
-describe(overloadUnaryServices.name, () => {
+describe(overloadServices.name, () => {
 	it('Should overload correct functions with promise and without promise', async () => {
 		class Callable extends Function {
 			requeStream: boolean;
@@ -55,7 +53,7 @@ describe(overloadUnaryServices.name, () => {
 			},
 		};
 
-		const overService = overloadUnaryServices(client as any);
+		const overService = overloadServices(client as any);
 		const resultAsync = await overService.test('any');
 		const resultSync = overService.test('any');
 		const streamCall = overService.stream('any');

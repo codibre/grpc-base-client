@@ -8,18 +8,22 @@ import {
 import { Options as PackageOptions, loadSync } from '@grpc/proto-loader';
 import { ClientConfig } from './client-config';
 import { ClientPool } from './client-pool';
-import { overloadUnaryServices } from './utils/overload-unary-services';
+import { overloadServices } from './utils/overload-services';
 
 export class Client<T> {
 	private packageDefinition!: GrpcObject;
 	private grpcInstance: T;
 
 	constructor(config: ClientConfig) {
-		this.grpcInstance = ClientPool.create<T>(
-			config.url,
-			+(config.maxConnections || 1),
-			() => this.createClient(config),
-		);
+		if (config.maxConnections === 0) {
+			this.grpcInstance = this.createClient(config);
+		} else {
+			this.grpcInstance = ClientPool.create<T>(
+				config.url,
+				config.maxConnections,
+				() => this.createClient(config),
+			);
+		}
 	}
 
 	public getInstance(): T {
@@ -43,7 +47,7 @@ export class Client<T> {
 			}, grpcPackage)[config.service] as ServiceClientConstructor;
 
 		const client = new grpcDef(config.url, credentials, config.grpcOptions);
-		const grpcClient = overloadUnaryServices(client) as unknown as T;
+		const grpcClient = overloadServices(client) as unknown as T;
 		return grpcClient;
 	}
 
