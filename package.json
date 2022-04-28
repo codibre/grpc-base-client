@@ -52,6 +52,12 @@
     "collectCoverageFrom": [
       "./src/**/*.ts"
     ],
+    "coveragePathIgnorePatterns": [
+      "/node_modules/",
+      "/dist/",
+      "src/index.ts",
+      "/test/server.ts"
+    ],
     "testEnvironment": "node",
     "setupFilesAfterEnv": [
       "./test/jest-setup.ts"

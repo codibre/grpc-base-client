@@ -1,8 +1,17 @@
 import { Client } from '../../src/client';
 import { ClientPool } from '../../src/client-pool';
+import { createServer } from '../server';
 
 describe('client.ts', () => {
-	afterEach(() => {
+	const internal = '0.0.0.0:50052';
+	const external = 'localhost:50052';
+	jest.setTimeout(10000);
+
+	beforeAll(async () => {
+		await createServer(internal);
+	});
+
+	afterEach(async () => {
 		delete require.cache[require.resolve('../../src/client')];
 	});
 
@@ -44,6 +53,8 @@ describe('client.ts', () => {
 		} catch (err) {
 			console.error(err);
 		}
+		expect(pool[0].poolPosition).toBe(0);
+		expect(pool[1].poolPosition).toBe(1);
 		expect(pool[0].Check).toHaveCallsLike(
 			[{ service: '1' }],
 			[{ service: '3' }],
@@ -63,7 +74,7 @@ describe('client.ts', () => {
 			namespace: 'abc.def',
 			protoFile: 'health-check.proto',
 			url: 'test.service2',
-			maxConnections: 2,
+			maxConnections: 3,
 			service: 'Health',
 			secure: true,
 		});
@@ -77,14 +88,19 @@ describe('client.ts', () => {
 			await chosenInstance.Check({ service: '1' });
 			await chosenInstance.Check({ service: '2' });
 			await chosenInstance.Check({ service: '3' });
+			await chosenInstance.Check({ service: '4' });
 		} catch (err) {
 			console.error(err);
 		}
 		expect(pool[0].Check).toHaveCallsLike(
 			[{ service: '1' }],
-			[{ service: '3' }],
+			[{ service: '4' }],
 		);
+		expect(pool[0].poolPosition).toBe(0);
+		expect(pool[1].poolPosition).toBe(1);
+		expect(pool[2].poolPosition).toBe(2);
 		expect(pool[1].Check).toHaveCallsLike([{ service: '2' }]);
+		expect(pool[2].Check).toHaveCallsLike([{ service: '3' }]);
 	});
 
 	it('should Create a Client and exec a call without pool', async () => {
@@ -121,5 +137,58 @@ describe('client.ts', () => {
 			[{ service: '2' }],
 			[{ service: '3' }],
 		);
+	});
+
+	it('should renew connection on stream error', (done) => {
+		const create = jest.spyOn(ClientPool, 'renewConnect' as any);
+		const client = new Client<any>(
+			{
+				namespace: 'test',
+				protoFile: './test/test.proto',
+				url: external,
+				maxConnections: 1,
+				service: 'Test',
+				secure: false,
+			},
+			ClientPool,
+		);
+		new Promise(async (resolve) => {
+			const stream = await client
+				.getInstance()
+				.ResponseStream({ foo: 'error' });
+			stream.on('error', (err: any) => {
+				resolve(err);
+			});
+		}).finally(() => {
+			expect(create).toHaveBeenCalledTimes(1);
+			done();
+		});
+	});
+
+	it('should renew connection on unary error', (done) => {
+		const create = jest.spyOn(ClientPool, 'renewConnect' as any);
+
+		const client = new Client<any>(
+			{
+				namespace: 'test',
+				protoFile: './test/test.proto',
+				url: external,
+				maxConnections: 1,
+				service: 'Test',
+				secure: false,
+			},
+			ClientPool,
+		);
+
+		new Promise(async (resolve) => {
+			try {
+				await client.getInstance().Unary({ foo: 'error' });
+			} catch (error) {
+				resolve(error);
+			}
+		}).finally(() => {
+			expect(create).toHaveBeenCalledTimes(1);
+			done();
+		});
 	});
 });

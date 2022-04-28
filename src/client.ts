@@ -5,6 +5,7 @@ import {
 	ServiceClientConstructor,
 	credentials as gRPCCredentials,
 } from '@grpc/grpc-js';
+
 import { Options as PackageOptions, loadSync } from '@grpc/proto-loader';
 import { ClientConfig } from './client-config';
 import { ClientPool } from './client-pool';
@@ -13,14 +14,18 @@ import { overloadServices } from './utils/overload-services';
 export class Client<T> {
 	private packageDefinition!: GrpcObject;
 	private grpcInstance: T;
+	readonly config: ClientConfig;
+	public poolPosition?: number;
 
-	constructor(config: ClientConfig) {
+	constructor(config: ClientConfig, poolService = ClientPool) {
+		this.config = config;
 		if (config.maxConnections === 0) {
 			this.grpcInstance = this.createClient(config);
 		} else {
-			this.grpcInstance = ClientPool.create<T>(
+			this.grpcInstance = poolService.create<T>(
 				config.url,
 				config.maxConnections,
+				config,
 				() => this.createClient(config),
 			);
 		}
@@ -47,8 +52,8 @@ export class Client<T> {
 			}, grpcPackage)[config.service] as ServiceClientConstructor;
 
 		const client = new grpcDef(config.url, credentials, config.grpcOptions);
-		const grpcClient = overloadServices(client) as unknown as T;
-		return grpcClient;
+		const grpcClient = overloadServices(client, config) as unknown as T;
+		return grpcClient as unknown as T;
 	}
 
 	private loadPackage(address: string, config?: PackageOptions): GrpcObject {

@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package test;
+
+message TestRequest {
+  string foo = 1;
+}
+
+message TestResponse {
+  string bar = 1;
+}
+
+service Test {
+  rpc Unary(TestRequest) returns (TestResponse);
+  rpc RequestStream(stream TestRequest) returns (TestResponse);
+  rpc ResponseStream(TestRequest) returns (stream TestResponse);
+  rpc DuplexStream(stream TestRequest) returns (stream TestResponse);
+}
