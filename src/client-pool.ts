@@ -8,33 +8,17 @@ interface ConnectionPool {
 
 export class ClientPool {
 	private static clientsPools: Map<string, ConnectionPool> = new Map();
-	public static create<T>(
+	public static create<T extends Con>(
 		alias: string,
 		size: number,
 		createClient: () => T,
 	): T {
-		let connectionPool: ConnectionPool | undefined =
-			ClientPool.clientsPools.get(alias);
-		if (!connectionPool) {
-			connectionPool = {
-				position: -1,
-				connections: [createClient()],
-			};
-			ClientPool.clientsPools.set(alias, connectionPool);
+		const connectionPool: ConnectionPool | undefined =
+			ClientPool.clientsPools.get(alias) ||
+			ClientPool.proxify(alias, createClient, size);
 
-			connectionPool.proxy = new Proxy(connectionPool.connections[0], {
-				get(_target, name) {
-					connectionPool!.position =
-						(connectionPool!.position + 1) % connectionPool!.connections.length;
-					const client = connectionPool!.connections[connectionPool!.position];
-					if (name in client) {
-						if (typeof client[name as keyof Con] === 'function') {
-							return client[name as keyof Con].bind(client);
-						}
-						return client[name as keyof Con];
-					}
-				},
-			});
+		if (connectionPool.connections.length > size) {
+			connectionPool.connections.length = size;
 		}
 
 		while (connectionPool.connections.length < size) {
@@ -42,5 +26,45 @@ export class ClientPool {
 		}
 
 		return connectionPool.proxy;
+	}
+
+	private static proxify<T extends Con>(
+		alias: string,
+		createClient: () => T,
+		size: number,
+	): ConnectionPool {
+		const baseConn = createClient();
+		const connectionPool: ConnectionPool = {
+			position: -1,
+			connections: [],
+		};
+		ClientPool.clientsPools.set(alias, connectionPool);
+		connectionPool.proxy = new Proxy(baseConn, {
+			get(_target, name) {
+				const client = ClientPool.chooseClient(connectionPool, createClient);
+				const method = client[name as keyof Con];
+				return typeof method === 'function' ? method.bind(client) : method;
+			},
+		});
+		if (size > 0) {
+			connectionPool.connections.push(baseConn);
+		}
+
+		return connectionPool;
+	}
+
+	private static chooseClient<T extends Con>(
+		connectionPool: ConnectionPool,
+		createClient: () => T,
+	) {
+		const { length } = connectionPool.connections;
+		let client: T;
+		if (length > 0) {
+			connectionPool.position = (connectionPool.position + 1) % length;
+			client = connectionPool.connections[connectionPool.position];
+		} else {
+			client = createClient();
+		}
+		return client;
 	}
 }
