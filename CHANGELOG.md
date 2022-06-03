@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/Codibre/grpc-base-client/compare/v1.1.0...v1.2.0) (2022-06-03)
+
+
+### Features
+
+* supports renewing connect on error ([#6](https://github.com/Codibre/grpc-base-client/issues/6)) ([fcbd362](https://github.com/Codibre/grpc-base-client/commit/fcbd3624a64156a3907423ef1596bab1653b7683))
+
 # [1.1.0](https://github.com/Codibre/grpc-base-client/compare/v1.0.2...v1.1.0) (2022-04-28)
 
 
