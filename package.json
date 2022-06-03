@@ -18,9 +18,9 @@
     "lint": "npm run lint:format && npm run lint:style",
     "lint:fix": "npm run lint:format:fix && npm run lint:style:fix",
     "build": "tsc -p tsconfig.build.json",
-    "test": "jest test/unit",
+    "test": "jest test/unit --forceExit",
     "test:watch": "jest test/unit --watch",
-    "test:coverage": "jest test/unit --coverage",
+    "test:coverage": "jest test/unit --coverage --forceExit",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest test/e2e",
     "clear": "npm run clear:build && npm run clear:modules",
@@ -51,6 +51,12 @@
     "coverageDirectory": "./coverage",
     "collectCoverageFrom": [
       "./src/**/*.ts"
+    ],
+    "coveragePathIgnorePatterns": [
+      "/node_modules/",
+      "/dist/",
+      "src/index.ts",
+      "/test/server.ts"
     ],
     "testEnvironment": "node",
     "setupFilesAfterEnv": [
