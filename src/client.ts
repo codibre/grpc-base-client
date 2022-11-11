@@ -19,16 +19,17 @@ export class Client<T> {
 
 	constructor(config: ClientConfig, poolService = ClientPool) {
 		this.config = config;
-		if (config.maxConnections === 0) {
-			this.grpcInstance = this.createClient(config);
-		} else {
-			this.grpcInstance = poolService.create<T>(
-				config.url,
-				config.maxConnections,
-				config,
-				() => this.createClient(config),
+		if (!config.maxConnections && config.maxConnections === 0) {
+			throw new Error(
+				'You need to specify maxConnections greater than 0 so we can set a pool properly!',
 			);
 		}
+		this.grpcInstance = poolService.create<T>(
+			config.url,
+			config.maxConnections,
+			config,
+			() => this.createClient(config),
+		);
 	}
 
 	public getInstance(): T {

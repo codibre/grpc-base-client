@@ -103,40 +103,22 @@ describe('client.ts', () => {
 		expect(pool[2].Check).toHaveCallsLike([{ service: '3' }]);
 	});
 
-	it('should Create a Client and exec a call without pool', async () => {
-		jest
-			.spyOn(Client.prototype, 'createClient' as any)
-			.mockImplementation(() => {
-				return {
-					Check: jest.fn(),
-				};
-			});
-		const client = new Client<Health>({
-			namespace: 'abc.def',
-			protoFile: 'health-check.proto',
-			url: 'test.service2',
-			maxConnections: 0,
-			service: 'Health',
-			secure: true,
-		});
-
-		const chosenInstance = client.getInstance();
-		const pool = ClientPool['clientsPools'].get('test.service2')?.connections;
-
+	it('should throw an error when maxConnections are empty', async () => {
+		let error: any;
 		try {
-			await chosenInstance.Check({ service: '1' });
-			await chosenInstance.Check({ service: '2' });
-			await chosenInstance.Check({ service: '3' });
+			new Client<Health>({
+				namespace: 'abc.def',
+				protoFile: 'health-check.proto',
+				url: 'test.service2',
+				maxConnections: 0,
+				service: 'Health',
+				secure: true,
+			});
 		} catch (err) {
-			console.error(err);
+			error = err;
 		}
 
-		expect(pool).toBeUndefined;
-		expect(chosenInstance.Check).toHaveCallsLike(
-			[{ service: '1' }],
-			[{ service: '2' }],
-			[{ service: '3' }],
-		);
+		expect(error).toBeInstanceOf(Error);
 	});
 
 	it('should renew connection on stream error', (done) => {
