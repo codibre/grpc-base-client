@@ -121,21 +121,14 @@ describe(overloadServices.name, () => {
 		);
 	});
 
-	it('Should not trigger Panic when noPanicControl is true', async () => {
-		jest.spyOn(overload, 'handlePanic').mockImplementation(() => {
-			return 'handlePanic';
-		});
-
-		const config = {
+	describe('disabled panic', () => {
+		const configBase = {
 			namespace: 'abc.def',
 			protoFile: 'health-check.proto',
 			url: 'test.service2',
-			maxConnections: 3,
 			service: 'Health',
 			secure: true,
-			noPanicControl: true,
 		};
-
 		const client = {
 			test: new UnaryCallFnFail(),
 			url: 'test.service2',
@@ -147,56 +140,53 @@ describe(overloadServices.name, () => {
 			test: UnaryCall<string, unknown>;
 		};
 
-		const overService = overload.overloadServices(client, config);
-		let resultAsync = undefined;
-		let err!: Error;
-		try {
-			resultAsync = await overService.test('any');
-		} catch (error) {
-			err = error as Error;
-		}
+		it('Should not trigger Panic when noPanicControl is true', async () => {
+			jest.spyOn(overload, 'handlePanic').mockImplementation(() => {
+				return 'handlePanic';
+			});
 
-		expect(handlePanic).toHaveCallsLike();
-		expect(resultAsync).toBe(undefined);
-		expect(err.message).toBe('Fake error');
-	});
+			const config = {
+				...configBase,
+				maxConnections: 3,
+				noPanicControl: true,
+			};
 
-	it('Should not trigger Panic when maxConnections is 0', async () => {
-		jest.spyOn(overload, 'handlePanic').mockImplementation(() => {
-			return 'handlePanic';
+			const overService = overload.overloadServices(client, config);
+			let resultAsync = undefined;
+			let err!: Error;
+			try {
+				resultAsync = await overService.test('any');
+			} catch (error) {
+				err = error as Error;
+			}
+
+			expect(handlePanic).toHaveCallsLike();
+			expect(resultAsync).toBe(undefined);
+			expect(err.message).toBe('Fake error');
 		});
 
-		const config = {
-			namespace: 'abc.def',
-			protoFile: 'health-check.proto',
-			url: 'test.service2',
-			maxConnections: 0,
-			service: 'Health',
-			secure: true,
-		};
+		it('Should not trigger Panic when maxConnections is 0', async () => {
+			jest.spyOn(overload, 'handlePanic').mockImplementation(() => {
+				return 'handlePanic';
+			});
 
-		const client = {
-			test: new UnaryCallFnFail(),
-			url: 'test.service2',
-			close: jest.fn(),
-			__proto__: {
-				test: jest.fn(),
-			},
-		} as unknown as GrpcServiceClient & {
-			test: UnaryCall<string, unknown>;
-		};
+			const config = {
+				...configBase,
+				maxConnections: 0,
+			};
 
-		const overService = overload.overloadServices(client, config);
-		let resultAsync = undefined;
-		let err!: Error;
-		try {
-			resultAsync = await overService.test('any');
-		} catch (error) {
-			err = error as Error;
-		}
+			const overService = overload.overloadServices(client, config);
+			let resultAsync = undefined;
+			let err!: Error;
+			try {
+				resultAsync = await overService.test('any');
+			} catch (error) {
+				err = error as Error;
+			}
 
-		expect(handlePanic).toHaveCallsLike();
-		expect(resultAsync).toBe(undefined);
-		expect(err.message).toBe('Fake error');
+			expect(handlePanic).toHaveCallsLike();
+			expect(resultAsync).toBe(undefined);
+			expect(err.message).toBe('Fake error');
+		});
 	});
 });
