@@ -20,7 +20,7 @@ const panicStatuses = new Set<Status | undefined>([
 
 export function handlePanic(client: ServiceClient, config: ClientConfig) {
 	if (config.noPanicControl !== true && config.maxConnections) {
-    ClientPool.renewConnect(config, client);
+		ClientPool.renewConnect(config, client);
 	}
 }
 
