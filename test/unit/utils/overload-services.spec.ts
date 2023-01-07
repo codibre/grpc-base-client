@@ -1,3 +1,4 @@
+import { ClientPool } from './../../../src/client-pool';
 /* eslint-disable object-shorthand */
 /* eslint-disable @typescript-eslint/no-empty-function */
 import {
@@ -42,16 +43,6 @@ class Callable extends Function {
 		return args;
 	}
 }
-
-afterEach(() => {
-	delete require.cache[require.resolve('../../../src/utils/overload-services')];
-});
-
-it('should start things', () => {
-	require('../../../src/utils/overload-services');
-
-	expect(jest.fn()).toHaveCallsLike();
-});
 
 describe(overloadServices.name, () => {
 	it('Should overload correct functions with promise and without promise', async () => {
@@ -117,7 +108,7 @@ describe(overloadServices.name, () => {
 		expect(handlePanic).toHaveBeenCalledOnce;
 		expect(resultAsync).toBe(undefined);
 		expect(err.message).toBe(
-			'Not found pool test.service2 to renew connection',
+			`Not found pool ${ClientPool.getAlias(config)} to renew connection`,
 		);
 	});
 

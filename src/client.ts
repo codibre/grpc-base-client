@@ -1,14 +1,9 @@
-import { GrpcServiceClient, GrpcServiceDefinition } from './types';
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import {
-	GrpcObject,
-	loadPackageDefinition,
-	ServiceClientConstructor,
-	credentials as gRPCCredentials,
-} from '@grpc/grpc-js';
-
-import { Options as PackageOptions, loadSync } from '@grpc/proto-loader';
-import { ClientConfig } from './client-config';
+import type { GrpcServiceClient, GrpcServiceDefinition } from './types';
+import type { ClientConfig } from './client-config';
+import type { GrpcObject, ServiceClientConstructor } from '@grpc/grpc-js';
+import type { Options as PackageOptions } from '@grpc/proto-loader';
+import { getGrpc } from './utils/grpc-lib';
+import { loadSync } from '@grpc/proto-loader';
 import { ClientPool } from './client-pool';
 import { overloadServices } from './utils/overload-services';
 
@@ -23,11 +18,8 @@ export class Client<T extends GrpcServiceDefinition<keyof T>> {
 		if (config.maxConnections === 0) {
 			this.grpcInstance = this.createClient(config);
 		} else {
-			this.grpcInstance = poolService.create<T>(
-				config.url,
-				config.maxConnections,
-				config,
-				() => this.createClient(config),
+			this.grpcInstance = poolService.create<T>(config, () =>
+				this.createClient(config),
 			);
 		}
 	}
@@ -37,12 +29,14 @@ export class Client<T extends GrpcServiceDefinition<keyof T>> {
 	}
 
 	private createClient(config: ClientConfig): T {
+		const grpc = getGrpc(config.legacy);
 		const credentials =
-			gRPCCredentials[config.secure ? 'createSsl' : 'createInsecure']();
+			grpc.credentials[config.secure ? 'createSsl' : 'createInsecure']();
 
 		const grpcPackage = this.loadPackage(
 			config.protoFile,
 			config.PackageOptions,
+			config.legacy,
 		);
 
 		const grpcDef = config.namespace
@@ -61,8 +55,13 @@ export class Client<T extends GrpcServiceDefinition<keyof T>> {
 		return grpcClient as unknown as T;
 	}
 
-	private loadPackage(address: string, config?: PackageOptions): GrpcObject {
+	private loadPackage(
+		address: string,
+		config: PackageOptions | undefined,
+		legacy: boolean | undefined,
+	): GrpcObject {
 		if (!this.packageDefinition) {
+			const grpc = getGrpc(legacy);
 			const conf = {
 				keepCase: false,
 				enums: String,
@@ -70,7 +69,7 @@ export class Client<T extends GrpcServiceDefinition<keyof T>> {
 				...config,
 			};
 			const pkgDef = loadSync(address, conf);
-			this.packageDefinition = loadPackageDefinition(pkgDef);
+			this.packageDefinition = grpc.loadPackageDefinition(pkgDef);
 		}
 		return this.packageDefinition;
 	}

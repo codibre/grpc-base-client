@@ -19,7 +19,9 @@
     "alwaysStrict": true,
     "strictBindCallApply": true,
     "strictFunctionTypes": true,
-    "noUncheckedIndexedAccess": true
+    "noUncheckedIndexedAccess": true,
+    "useUnknownInCatchVariables": false,
+    "allowJs": true,
   },
   "include": ["./src", "./test"]
 }

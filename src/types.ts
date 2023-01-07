@@ -1,11 +1,14 @@
 import {
 	CallOptions,
 	Metadata,
-	ClientDuplexStream,
 	ClientReadableStream,
 	ClientWritableStream,
 	Client,
 } from '@grpc/grpc-js';
+
+export interface GrpcAsyncIterable<T> extends AsyncIterable<T> {
+	onMetadata(callback: (metadata: Metadata) => any): void;
+}
 
 export interface RawUnaryCall<P, R> {
 	(param: P, callback: (err: Error, response: R) => void): void;
@@ -28,15 +31,12 @@ export interface RawUnaryCall<P, R> {
 }
 
 export interface StreamCall<P, R> {
-	(param: P, deadline?: Partial<CallOptions> | undefined): ClientDuplexStream<
-		P,
-		R
-	>;
+	(param: P, deadline?: Partial<CallOptions>): GrpcAsyncIterable<R>;
 	(
 		param: P,
 		metadata: Metadata,
-		deadline?: Partial<CallOptions> | undefined,
-	): ClientDuplexStream<P, R>;
+		deadline?: Partial<CallOptions>,
+	): GrpcAsyncIterable<R>;
 	requestStream: ClientWritableStream<P>;
 	responseStream: ClientReadableStream<R>;
 }
@@ -59,6 +59,9 @@ export function isStreamCall<P, R>(
 		(action as StreamCall<P, R>).responseStream
 		? true
 		: false;
+}
+export function isGrpcFunction(action: unknown): action is Function {
+	return typeof action === 'function' && !action.name.startsWith('$');
 }
 
 type KeyType = string | number | symbol;
