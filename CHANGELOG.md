@@ -1,3 +1,17 @@
+# [2.0.0](https://github.com/Codibre/grpc-base-client/compare/v1.4.0...v2.0.0) (2023-01-07)
+
+
+### Features
+
+* adding legacy grpc lib support ([#9](https://github.com/Codibre/grpc-base-client/issues/9)) ([45a7f3d](https://github.com/Codibre/grpc-base-client/commit/45a7f3d89c81a00afc63cf71061aa94aa4b78b1a))
+
+
+### BREAKING CHANGES
+
+* The library contract needed to be changed in order to keep functionalities compatible between both versions.
+Although the contract must be almost equal some things like error catching have behaved differently between them. Due to that,
+we chose an approach that works for both packages, but we need to break the contract.
+
 # [1.4.0](https://github.com/Codibre/grpc-base-client/compare/v1.3.0...v1.4.0) (2023-01-07)
 
 
