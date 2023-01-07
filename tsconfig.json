@@ -18,7 +18,8 @@
     "noImplicitAny": true,
     "alwaysStrict": true,
     "strictBindCallApply": true,
-    "strictFunctionTypes": true
+    "strictFunctionTypes": true,
+    "noUncheckedIndexedAccess": true
   },
   "include": ["./src", "./test"]
 }

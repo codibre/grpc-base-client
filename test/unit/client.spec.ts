@@ -1,5 +1,5 @@
-import { Client } from '../../src/client';
-import { ClientPool } from '../../src/client-pool';
+import { Metadata } from '@grpc/grpc-js';
+import { Client, ClientPool, UnaryCall } from '../../src';
 import { createServer } from '../server';
 
 describe('client.ts', () => {
@@ -22,7 +22,7 @@ describe('client.ts', () => {
 	});
 
 	interface Health {
-		Check(props: { service: string }): Promise<any>;
+		Check: UnaryCall<{ service: string }, any>;
 	}
 
 	it('should Create a Client and exec a call with correct pool', async () => {
@@ -137,6 +137,50 @@ describe('client.ts', () => {
 			[{ service: '2' }],
 			[{ service: '3' }],
 		);
+	});
+
+	it('should apply middlewares and updated parameters', async () => {
+		const defaultMiddleware = jest.fn();
+		const middleware = jest.fn();
+		const deadline = Date.now() + 9999999;
+		const client = new Client<{ Unary: UnaryCall<{ foo: string }, unknown> }>({
+			namespace: 'test',
+			protoFile: './test/test.proto',
+			url: external,
+			maxConnections: 0,
+			service: 'Test',
+			secure: false,
+			middlewares: {
+				'*': [defaultMiddleware],
+				Unary: [
+					(params) => {
+						params[0] = {
+							foo: params[0].foo + '2',
+						};
+						params[1].set('myMeta', 'myValue');
+						params[2] = {
+							...params[2],
+							deadline,
+						};
+					},
+					(params) => {
+						params[0].foo += '3';
+					},
+					middleware,
+				],
+			},
+		});
+		const chosenInstance = client.getInstance();
+
+		const result = await chosenInstance.Unary({ foo: '1' });
+
+		const metadata = new Metadata();
+		metadata.set('myMeta', 'myValue');
+		expect(defaultMiddleware).toHaveCallsLike([[metadata, {}]]);
+		expect(middleware).toHaveCallsLike([
+			[{ foo: '123' }, metadata, { deadline }],
+		]);
+		expect(result).toEqual({ bar: '123' });
 	});
 
 	it('should renew connection on stream error', (done) => {
