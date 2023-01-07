@@ -1,30 +1,21 @@
-import { CallOptions, Metadata, ServiceError } from '@grpc/grpc-js';
+import { GrpcServiceClient, StreamCall } from './../types';
+import { ServiceError } from '@grpc/grpc-js';
 import { Status } from '@grpc/grpc-js/build/src/constants';
 import { ServiceClient } from '@grpc/grpc-js/build/src/make-client';
 import { ClientConfig } from '../client-config';
 import { ClientPool } from '../client-pool';
-
-export interface UnaryCall<P> {
-	(param: P, ...args: unknown[]): void;
-}
-export interface UnaryCallPromisify<P, R> {
-	(param: P, deadline: Partial<CallOptions> | undefined): PromiseLike<R>;
-	(
-		param: P,
-		metadata: Metadata,
-		deadline: Partial<CallOptions> | undefined,
-	): PromiseLike<R>;
-}
+import { isStreamCall, RawUnaryCall, UnaryCall } from '../types';
+import { applyMiddlewares } from './apply-middlewares';
 
 export function handlePanic(client: ServiceClient, config: ClientConfig) {
 	ClientPool.renewConnect(config.url, client);
 }
 
 function promisifyUnary<P, R>(
-	unaryCall: UnaryCall<P>,
+	unaryCall: RawUnaryCall<P, R>,
 	client: ServiceClient,
 	config: ClientConfig,
-): UnaryCallPromisify<P, R> {
+): UnaryCall<P, R> {
 	return (param: P, ...args: unknown[]) =>
 		new Promise<R>((resolve, reject) =>
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -44,42 +35,59 @@ function promisifyUnary<P, R>(
 		);
 }
 
-export function overloadServices(
-	client: ServiceClient,
+function applyPanicHandling<TService extends GrpcServiceClient>(
+	client: TService,
+	serviceName: string,
+	action: StreamCall<unknown, unknown>,
+	config: ClientConfig<any>,
+) {
+	try {
+		client[serviceName as keyof TService] = ((...args: any) => {
+			const stream = action.apply(client, args);
+			stream.on('error', (error: ServiceError) => {
+				if (error?.code === Status.UNAVAILABLE) {
+					handlePanic(client, config);
+				}
+			});
+
+			return stream;
+		}) as unknown as TService[keyof TService];
+	} catch (error) {
+		console.log(serviceName);
+	}
+}
+
+function applyPromisify<TService extends GrpcServiceClient>(
+	client: TService,
+	serviceName: string,
+	action: any,
+	config: ClientConfig<any>,
+) {
+	(client as any)[serviceName] = promisifyUnary(
+		action.bind(client),
+		client,
+		config,
+	);
+}
+
+export function overloadServices<TService extends GrpcServiceClient>(
+	client: TService,
 	config: ClientConfig,
-): ServiceClient {
-	const services = Object.keys(client.__proto__);
-	services.forEach((serviceName) => {
-		const action = client[serviceName] as any;
-		if (!action) {
-			return;
-		}
-		const isUnary = !action?.requestStream && !action?.responseStream;
-		if (isUnary) {
-			(client as any)[serviceName] = promisifyUnary(
-				action.bind(client),
-				client,
-				config,
-			);
-		}
-
-		if (action?.requestStream || action?.responseStream) {
-			try {
-				client[serviceName] = (...args: any[]) => {
-					const stream = action.apply(client, args);
-					stream.on('error', (error: ServiceError) => {
-						if (error?.code === Status.UNAVAILABLE) {
-							handlePanic(client, config);
-						}
-					});
-
-					return stream;
-				};
-			} catch (error) {
-				console.log(serviceName);
+): TService {
+	for (const serviceName in client.__proto__!) {
+		if (client.__proto__!.hasOwnProperty(serviceName)) {
+			const action = client[serviceName] as any;
+			if (action) {
+				if (isStreamCall(action)) {
+					applyPanicHandling(client, serviceName, action, config);
+				} else {
+					applyPromisify(client, serviceName, action, config);
+				}
 			}
 		}
-	});
+	}
+
+	applyMiddlewares(client, config.middlewares);
 
 	return client;
 }

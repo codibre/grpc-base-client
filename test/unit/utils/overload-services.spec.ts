@@ -5,6 +5,7 @@ import {
 	overloadServices,
 } from '../../../src/utils/overload-services';
 import * as overload from '../../../src/utils/overload-services';
+import { GrpcServiceClient, UnaryCall } from '../../../src';
 
 class UnaryCallFn extends Function {
 	requeStream: boolean;
@@ -100,9 +101,11 @@ describe(overloadServices.name, () => {
 			__proto__: {
 				test: jest.fn(),
 			},
+		} as unknown as GrpcServiceClient & {
+			test: UnaryCall<string, unknown>;
 		};
 
-		const overService = overload.overloadServices(client as any, config);
+		const overService = overload.overloadServices(client, config);
 		let resultAsync = undefined;
 		let err!: Error;
 		try {

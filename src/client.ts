@@ -1,3 +1,4 @@
+import { GrpcServiceClient, GrpcServiceDefinition } from './types';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
 	GrpcObject,
@@ -11,13 +12,13 @@ import { ClientConfig } from './client-config';
 import { ClientPool } from './client-pool';
 import { overloadServices } from './utils/overload-services';
 
-export class Client<T> {
+export class Client<T extends GrpcServiceDefinition<keyof T>> {
 	private packageDefinition!: GrpcObject;
 	private grpcInstance: T;
-	readonly config: ClientConfig;
+	readonly config: ClientConfig<T>;
 	public poolPosition?: number;
 
-	constructor(config: ClientConfig, poolService = ClientPool) {
+	constructor(config: ClientConfig<T>, poolService = ClientPool) {
 		this.config = config;
 		if (config.maxConnections === 0) {
 			this.grpcInstance = this.createClient(config);
@@ -51,7 +52,11 @@ export class Client<T> {
 				return current;
 			}, grpcPackage)[config.service] as ServiceClientConstructor;
 
-		const client = new grpcDef(config.url, credentials, config.grpcOptions);
+		const client = new grpcDef(
+			config.url,
+			credentials,
+			config.grpcOptions,
+		) as GrpcServiceClient;
 		const grpcClient = overloadServices(client, config) as unknown as T;
 		return grpcClient as unknown as T;
 	}
