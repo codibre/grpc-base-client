@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/Codibre/grpc-base-client/compare/v1.2.0...v1.3.0) (2023-01-07)
+
+
+### Features
+
+* adding gRPC middleware support ([#8](https://github.com/Codibre/grpc-base-client/issues/8)) ([a36a92d](https://github.com/Codibre/grpc-base-client/commit/a36a92d5829986949082208891ced81ecbc6ffc3))
+
 # [1.2.0](https://github.com/Codibre/grpc-base-client/compare/v1.1.0...v1.2.0) (2022-06-03)
 
 
