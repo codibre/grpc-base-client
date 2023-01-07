@@ -23,8 +23,9 @@
         "name": "Tests",
         "skipFiles": ["<node_internals>/**"],
         "cwd": "${workspaceRoot}",
+        "runtimeExecutable": "${env:HOME}/.nvm/nvm-exec",
+        "runtimeArgs": ["node", "-r", "ts-node/register"],
         "args": [
-          "-r", "ts-node/register",
           "${workspaceRoot}/node_modules/jest/bin/jest",
           "test/unit",
           "--runInBand"

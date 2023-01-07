@@ -30,12 +30,9 @@ function factoryPoolProxy(connectionPool: ConnectionPool): ConnectionPool {
 
 export class ClientPool {
 	private static clientsPools: Map<string, ConnectionPool> = new Map();
-	public static create<T>(
-		alias: string,
-		size: number,
-		config: ClientConfig,
-		createClient: () => T,
-	): T {
+	public static create<T>(config: ClientConfig, createClient: () => T): T {
+		const alias = this.getAlias(config);
+		const size = config.maxConnections;
 		let connectionPool: ConnectionPool | undefined =
 			ClientPool.clientsPools.get(alias);
 		if (!connectionPool) {
@@ -58,6 +55,9 @@ export class ClientPool {
 
 		return connectionPool.proxy;
 	}
+	static getAlias(config: ClientConfig<any>) {
+		return `${config.url}~${config.legacy ? 'legacy' : 'current'}`;
+	}
 
 	public static addConnection<T>(alias: string, createClient: () => T): T {
 		const pool = ClientPool.clientsPools.get(alias);
@@ -70,7 +70,8 @@ export class ClientPool {
 		return pool.proxy;
 	}
 
-	public static renewConnect<T>(alias: string, client: Client): T {
+	public static renewConnect<T>(config: ClientConfig, client: Client): T {
+		const alias = this.getAlias(config);
 		const position = (client as any).poolPosition;
 		const pool = ClientPool.clientsPools.get(alias);
 		if (!pool) {

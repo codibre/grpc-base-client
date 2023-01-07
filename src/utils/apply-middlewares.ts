@@ -2,6 +2,7 @@ import {
 	GrpcServiceDefinition,
 	GrpcMethodMiddleware,
 	DefaultGrpcMiddleware,
+	isGrpcFunction,
 } from './../types';
 import { GrpcMiddlewares } from '../types';
 import { CallOptions, Metadata } from '@grpc/grpc-js';
@@ -39,12 +40,13 @@ function getNewParameters<TService extends GrpcServiceDefinition>(
 		Metadata | Partial<CallOptions> | undefined,
 		Partial<CallOptions> | undefined,
 	],
+	MetadataClass: new () => Metadata,
 ): [Parameters<TService[keyof TService]>[0], Metadata, Partial<CallOptions>] {
 	const [params] = args;
 	let [, metadata, options] = args;
 	if (!(metadata instanceof Metadata)) {
 		options = metadata ? metadata : {};
-		metadata = new Metadata();
+		metadata = new MetadataClass();
 	} else if (!options) {
 		options = {};
 	}
@@ -53,7 +55,8 @@ function getNewParameters<TService extends GrpcServiceDefinition>(
 
 export function applyMiddlewares<TService extends GrpcServiceDefinition>(
 	client: TService,
-	serviceMiddlewares?: GrpcMiddlewares<TService>,
+	serviceMiddlewares: GrpcMiddlewares<TService> | undefined,
+	MetadataClass: new () => Metadata,
 ) {
 	if (serviceMiddlewares) {
 		const defaultMiddlewares = serviceMiddlewares['*'] ?? [];
@@ -65,18 +68,20 @@ export function applyMiddlewares<TService extends GrpcServiceDefinition>(
 					middlewares,
 				);
 				if (callMiddlewares) {
-					const rawCall = client[k]!;
-					client[k] = ((
-						...args: [
-							Parameters<TService[keyof TService]>[0],
-							Partial<CallOptions> | Metadata | undefined,
-							Partial<CallOptions> | undefined,
-						]
-					) => {
-						const newArgs = getNewParameters<TService>(args);
-						callMiddlewares.call(serviceMiddlewares, newArgs);
-						return (rawCall as Function).apply(client, newArgs);
-					}) as TService[Extract<keyof TService, string>];
+					const rawCall = client[k];
+					if (isGrpcFunction(rawCall)) {
+						client[k] = ((
+							...args: [
+								Parameters<TService[keyof TService]>[0],
+								Partial<CallOptions> | Metadata | undefined,
+								Partial<CallOptions> | undefined,
+							]
+						) => {
+							const newArgs = getNewParameters<TService>(args, MetadataClass);
+							callMiddlewares.call(serviceMiddlewares, newArgs);
+							return (rawCall as Function).apply(client, newArgs);
+						}) as TService[Extract<keyof TService, string>];
+					}
 				}
 			}
 		}

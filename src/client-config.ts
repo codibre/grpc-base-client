@@ -13,4 +13,9 @@ export interface ClientConfig<TService extends GrpcServiceDefinition = any> {
 	grpcOptions?: Partial<ChannelOptions>;
 	middlewares?: GrpcMiddlewares<TService>;
 	noPanicControl?: boolean;
+	/**
+	 * Due to memory leak in the current @grpc/grpc-js version (https://github.com/grpc/grpc-node/issues/1339),
+	 * you may want to stick with the legacy package. With this option, you can do this seamlessly
+	 */
+	legacy?: boolean;
 }
