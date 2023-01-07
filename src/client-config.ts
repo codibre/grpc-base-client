@@ -12,4 +12,5 @@ export interface ClientConfig<TService extends GrpcServiceDefinition = any> {
 	PackageOptions?: PackageOptions;
 	grpcOptions?: Partial<ChannelOptions>;
 	middlewares?: GrpcMiddlewares<TService>;
+	noPanicControl?: boolean;
 }

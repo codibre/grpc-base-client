@@ -8,7 +8,9 @@ import { isStreamCall, RawUnaryCall, UnaryCall } from '../types';
 import { applyMiddlewares } from './apply-middlewares';
 
 export function handlePanic(client: ServiceClient, config: ClientConfig) {
-	ClientPool.renewConnect(config.url, client);
+	if (config.noPanicControl !== true && config.maxConnections) {
+		ClientPool.renewConnect(config.url, client);
+	}
 }
 
 function promisifyUnary<P, R>(
