@@ -27,7 +27,7 @@ jobs:
       - run: npm test
       - uses: actions/setup-node@v1
         with:
-          node-version: "16.x"
+          node-version: "18.x"
       - run: npm i -g @semantic-release/changelog @semantic-release/commit-analyzer @semantic-release/git @semantic-release/github @semantic-release/npm @semantic-release/release-notes-generator @semantic-release/exec semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
