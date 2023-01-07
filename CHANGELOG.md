@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/Codibre/grpc-base-client/compare/v1.3.0...v1.4.0) (2023-01-07)
+
+
+### Features
+
+* adding noPanicControl option ([#10](https://github.com/Codibre/grpc-base-client/issues/10)) ([1e16f18](https://github.com/Codibre/grpc-base-client/commit/1e16f188a615495df44d5f436cd2b213d9dae3f4))
+
 # [1.3.0](https://github.com/Codibre/grpc-base-client/compare/v1.2.0...v1.3.0) (2023-01-07)
 
 
