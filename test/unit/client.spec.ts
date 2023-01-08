@@ -1,6 +1,5 @@
 import { Server } from '@grpc/grpc-js';
 import { Client, ClientPool, StreamCall, UnaryCall } from '../../src';
-import { getGrpc } from '../../src/utils/grpc-lib';
 import { createServer } from '../server';
 
 describe('client.ts', () => {
@@ -194,8 +193,7 @@ describe('client.ts', () => {
 
 				const result = await chosenInstance.Unary({ foo: '1' });
 
-				const MetadataClass = getGrpc(legacy).Metadata;
-				const metadata = new MetadataClass();
+				const metadata = client.createMetadata();
 				metadata.set('myMeta', 'myValue');
 				expect(defaultMiddleware).toHaveCallsLike([[metadata, {}], 'Unary']);
 				expect(endingDefaultMiddleware).toHaveCallsLike([undefined]);

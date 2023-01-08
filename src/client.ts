@@ -28,6 +28,11 @@ export class Client<T extends GrpcServiceDefinition<keyof T>> {
 		return this.grpcInstance;
 	}
 
+	public createMetadata() {
+		const grpc = getGrpc(this.config.legacy);
+		return new grpc.Metadata();
+	}
+
 	private createClient(config: ClientConfig): T {
 		const grpc = getGrpc(config.legacy);
 		const credentials =
