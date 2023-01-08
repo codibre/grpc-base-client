@@ -1,3 +1,10 @@
+# [2.1.0](https://github.com/Codibre/grpc-base-client/compare/v2.0.0...v2.1.0) (2023-01-08)
+
+
+### Features
+
+* adding support for middleware ending result ([ac9d9f0](https://github.com/Codibre/grpc-base-client/commit/ac9d9f04a8af272d7808b27881edff787b3eebeb))
+
 # [2.0.0](https://github.com/Codibre/grpc-base-client/compare/v1.4.0...v2.0.0) (2023-01-07)
 
 
