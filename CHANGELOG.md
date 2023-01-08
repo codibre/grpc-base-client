@@ -1,3 +1,10 @@
+## [2.1.1](https://github.com/Codibre/grpc-base-client/compare/v2.1.0...v2.1.1) (2023-01-08)
+
+
+### Bug Fixes
+
+* passing method name to default middleware ([e11d4be](https://github.com/Codibre/grpc-base-client/commit/e11d4beb0adf7c3842d433c64ed151010216dab2))
+
 # [2.1.0](https://github.com/Codibre/grpc-base-client/compare/v2.0.0...v2.1.0) (2023-01-08)
 
 
