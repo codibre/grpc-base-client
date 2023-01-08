@@ -1,3 +1,10 @@
+## [2.1.2](https://github.com/Codibre/grpc-base-client/compare/v2.1.1...v2.1.2) (2023-01-08)
+
+
+### Bug Fixes
+
+* adding method for metadata creation ([ca80841](https://github.com/Codibre/grpc-base-client/commit/ca808417994688553dab7cb7557acba18b5fada7))
+
 ## [2.1.1](https://github.com/Codibre/grpc-base-client/compare/v2.1.0...v2.1.1) (2023-01-08)
 
 
