@@ -1,6 +1,5 @@
 import {
 	GrpcServiceDefinition,
-	GrpcMethodMiddleware,
 	DefaultGrpcMiddleware,
 	isGrpcFunction,
 	GrpcFunction,
@@ -24,8 +23,10 @@ function treatMiddlewareResult(
 
 function callMiddlewaresFactory<TService extends GrpcServiceDefinition>(
 	defaultMiddlewares: DefaultGrpcMiddleware[],
-	methodMiddlewares: GrpcMethodMiddleware<TService, keyof TService>[] = [],
+	grpcMiddlewares: GrpcMiddlewares<TService>,
+	key: keyof TService,
 ) {
+	const methodMiddlewares = grpcMiddlewares[key] ?? [];
 	if (!methodMiddlewares.length && !defaultMiddlewares.length) {
 		return undefined;
 	}
@@ -41,7 +42,7 @@ function callMiddlewaresFactory<TService extends GrpcServiceDefinition>(
 		const onItems: Array<NonNullable<MiddlewareResult['onItem']>> = [];
 		const [, ...others] = params;
 		for (const middleware of defaultMiddlewares) {
-			treatMiddlewareResult(middleware(others), onEnds, onItems);
+			treatMiddlewareResult(middleware(others, key as string), onEnds, onItems);
 		}
 		params[1] = others[0];
 		params[2] = others[1];
@@ -173,10 +174,10 @@ export function applyMiddlewares<TService extends GrpcServiceDefinition>(
 		const defaultMiddlewares = serviceMiddlewares['*'] ?? [];
 		for (const k in client) {
 			if (client.hasOwnProperty(k)) {
-				const middlewares = serviceMiddlewares[k];
 				const callMiddlewares = callMiddlewaresFactory(
 					defaultMiddlewares,
-					middlewares,
+					serviceMiddlewares,
+					k,
 				);
 				if (callMiddlewares) {
 					const rawCall = client[k];

@@ -94,6 +94,7 @@ export interface MiddlewareResult {
 
 export type DefaultGrpcMiddleware = (
 	params: Parameters<OtherGrpcParams>,
+	methodName: string,
 ) => void | MiddlewareResult;
 export type GrpcMethodMiddleware<
 	TService extends GrpcServiceDefinition<KeyType>,

@@ -197,7 +197,7 @@ describe('client.ts', () => {
 				const MetadataClass = getGrpc(legacy).Metadata;
 				const metadata = new MetadataClass();
 				metadata.set('myMeta', 'myValue');
-				expect(defaultMiddleware).toHaveCallsLike([[metadata, {}]]);
+				expect(defaultMiddleware).toHaveCallsLike([[metadata, {}], 'Unary']);
 				expect(endingDefaultMiddleware).toHaveCallsLike([undefined]);
 				expect(middleware).toHaveCallsLike([
 					[{ foo: '123' }, metadata, expect.objectContaining({ deadline })],
