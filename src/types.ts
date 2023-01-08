@@ -87,13 +87,20 @@ export interface OtherGrpcParams {
 	(metadata: Metadata, options: Partial<CallOptions>): void;
 }
 
+export interface MiddlewareResult {
+	onEnd?(error: unknown | undefined): void;
+	onItem?<T>(result: T): T;
+}
+
 export type DefaultGrpcMiddleware = (
 	params: Parameters<OtherGrpcParams>,
-) => void;
+) => void | MiddlewareResult;
 export type GrpcMethodMiddleware<
 	TService extends GrpcServiceDefinition<KeyType>,
 	k extends keyof TService,
-> = (params: Parameters<FullGrpcParams<TService, k>>) => void;
+> = (
+	params: Parameters<FullGrpcParams<TService, k>>,
+) => void | MiddlewareResult;
 
 export type GrpcMiddlewares<TService extends GrpcServiceDefinition<KeyType>> = {
 	[k in keyof TService]: GrpcMethodMiddleware<TService, k>[];

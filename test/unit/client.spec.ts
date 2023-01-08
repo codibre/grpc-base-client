@@ -154,7 +154,10 @@ describe('client.ts', () => {
 			});
 
 			it('should apply middlewares and updated parameters', async () => {
-				const defaultMiddleware = jest.fn();
+				const endingDefaultMiddleware = jest.fn();
+				const defaultMiddleware = jest
+					.fn()
+					.mockReturnValue({ onEnd: endingDefaultMiddleware });
 				const middleware = jest.fn();
 				const deadline = Date.now() + 9999999;
 				const client = new Client<{
@@ -195,6 +198,7 @@ describe('client.ts', () => {
 				const metadata = new MetadataClass();
 				metadata.set('myMeta', 'myValue');
 				expect(defaultMiddleware).toHaveCallsLike([[metadata, {}]]);
+				expect(endingDefaultMiddleware).toHaveCallsLike([undefined]);
 				expect(middleware).toHaveCallsLike([
 					[{ foo: '123' }, metadata, expect.objectContaining({ deadline })],
 				]);
