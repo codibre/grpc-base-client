@@ -77,9 +77,9 @@
   "keywords": [],
   "license": "MIT",
   "peerDependencies": {
-    "grpc": "*",
     "@grpc/grpc-js": "*",
-    "@grpc/proto-loader": "*"
+    "@grpc/proto-loader": "*",
+    "grpc": "*"
   },
   "peerDependenciesMeta": {
     "grpc": {
@@ -109,6 +109,7 @@
     "typescript": "^4.5.2"
   },
   "dependencies": {
+    "@codibre/fluent-iterable": "*",
     "@grpc/grpc-js": "^1.3.1",
     "@grpc/proto-loader": "^0.6.2",
     "grpc": "^1.24.11"
