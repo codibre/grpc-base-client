@@ -1,3 +1,10 @@
+# [2.2.0](https://github.com/Codibre/grpc-base-client/compare/v2.1.2...v2.2.0) (2023-01-16)
+
+
+### Features
+
+* using fluent-iterable for more powerful iterables ([#11](https://github.com/Codibre/grpc-base-client/issues/11)) ([182cc8a](https://github.com/Codibre/grpc-base-client/commit/182cc8a74bf80e301092e659486a259fdc7479e8))
+
 ## [2.1.2](https://github.com/Codibre/grpc-base-client/compare/v2.1.1...v2.1.2) (2023-01-08)
 
 
