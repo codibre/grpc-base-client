@@ -1,3 +1,4 @@
+import { FluentAsyncIterable } from '@codibre/fluent-iterable';
 import {
 	CallOptions,
 	Metadata,
@@ -6,7 +7,7 @@ import {
 	Client,
 } from '@grpc/grpc-js';
 
-export interface GrpcAsyncIterable<T> extends AsyncIterable<T> {
+export interface GrpcAsyncIterable<T> extends FluentAsyncIterable<T> {
 	onMetadata(callback: (metadata: Metadata) => any): void;
 }
 

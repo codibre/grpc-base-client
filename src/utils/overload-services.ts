@@ -1,3 +1,4 @@
+import { fluentAsync, FluentAsyncIterable } from '@codibre/fluent-iterable';
 import {
 	GrpcServiceClient,
 	isGrpcFunction,
@@ -45,19 +46,17 @@ function promisifyUnary<P, R>(
 		);
 }
 
-async function* getGrpcAsyncIterable<TService extends GrpcServiceClient>(
+function getGrpcAsyncIterable<TService extends GrpcServiceClient>(
 	stream: ClientDuplexStream<unknown, unknown>,
 	client: TService,
 	config: ClientConfig<any>,
-): AsyncIterable<unknown> {
-	try {
-		yield* stream;
-	} catch (error) {
+): FluentAsyncIterable<unknown> {
+	return fluentAsync(stream).catch((error) => {
 		if (panicStatuses.has(error?.code)) {
 			handlePanic(client, config);
 		}
 		throw error;
-	}
+	});
 }
 
 function applyPanicHandling<TService extends GrpcServiceClient>(

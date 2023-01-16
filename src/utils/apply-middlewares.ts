@@ -8,6 +8,7 @@ import {
 } from './../types';
 import { GrpcMiddlewares } from '../types';
 import { CallOptions, Metadata } from '@grpc/grpc-js';
+import { fluentAsync, FluentAsyncIterable } from '@codibre/fluent-iterable';
 
 function treatMiddlewareResult(
 	result: void | MiddlewareResult,
@@ -93,14 +94,15 @@ function endingWithoutError(
 	}
 }
 
-function procOnItem<T>(
+function procOnItemFactory<T>(
 	onItems: NonNullable<MiddlewareResult['onItem']>[],
-	result: T,
 ) {
-	for (const onItem of onItems) {
-		result = onItem(result);
-	}
-	return result;
+	return (result: T) => {
+		for (const onItem of onItems) {
+			result = onItem(result);
+		}
+		return result;
+	};
 }
 
 async function wrapPromise<T>(
@@ -108,9 +110,10 @@ async function wrapPromise<T>(
 	onEnds: Array<NonNullable<MiddlewareResult['onEnd']>>,
 	onItems: Array<NonNullable<MiddlewareResult['onItem']>>,
 ) {
+	const procOnItem = procOnItemFactory(onItems);
 	let ended = false;
 	try {
-		return procOnItem(onItems, await promise);
+		return procOnItem(await promise);
 	} catch (err) {
 		ended = true;
 		endingWithError(onEnds, err);
@@ -119,26 +122,19 @@ async function wrapPromise<T>(
 	}
 }
 
-async function* wrapIterable<T>(
+function wrapIterable<T>(
 	iterable: AsyncIterable<T>,
 	onEnds: Array<NonNullable<MiddlewareResult['onEnd']>>,
 	onItems: Array<NonNullable<MiddlewareResult['onItem']>>,
-): AsyncIterable<T> {
+): FluentAsyncIterable<T> {
 	let ended = false;
-	try {
-		if (onItems.length) {
-			for await (const item of iterable) {
-				yield procOnItem(onItems, item);
-			}
-		} else {
-			yield* iterable;
-		}
-	} catch (err) {
-		ended = true;
-		endingWithError(onEnds, err);
-	} finally {
-		endingWithoutError(ended, onEnds);
-	}
+	return fluentAsync(iterable)
+		.map(procOnItemFactory(onItems))
+		.catch((err) => {
+			ended = true;
+			return endingWithError(onEnds, err);
+		})
+		.finally(() => endingWithoutError(ended, onEnds));
 }
 
 function runWrapped<TService extends GrpcServiceDefinition>(
