@@ -1,3 +1,10 @@
+## [2.2.1](https://github.com/Codibre/grpc-base-client/compare/v2.2.0...v2.2.1) (2023-02-15)
+
+
+### Bug Fixes
+
+* turning grpc package optional ([#12](https://github.com/Codibre/grpc-base-client/issues/12)) ([ff2780b](https://github.com/Codibre/grpc-base-client/commit/ff2780b6ad48f1c08dc6007af3f540752b9b67d5))
+
 # [2.2.0](https://github.com/Codibre/grpc-base-client/compare/v2.1.2...v2.2.0) (2023-01-16)
 
 
