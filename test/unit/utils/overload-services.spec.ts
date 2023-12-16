@@ -63,7 +63,7 @@ describe(overloadServices.name, () => {
 			},
 		};
 
-		const overService = overloadServices(client as any, config);
+		const overService = overloadServices(client as any, config, false);
 		const resultAsync = await overService.test('any');
 		const resultSync = overService.test('any');
 
@@ -96,7 +96,7 @@ describe(overloadServices.name, () => {
 			test: UnaryCall<string, unknown>;
 		};
 
-		const overService = overload.overloadServices(client, config);
+		const overService = overload.overloadServices(client, config, false);
 		let resultAsync = undefined;
 		let err!: Error;
 		try {
@@ -142,7 +142,7 @@ describe(overloadServices.name, () => {
 				noPanicControl: true,
 			};
 
-			const overService = overload.overloadServices(client, config);
+			const overService = overload.overloadServices(client, config, false);
 			let resultAsync = undefined;
 			let err!: Error;
 			try {
@@ -166,7 +166,7 @@ describe(overloadServices.name, () => {
 				maxConnections: 0,
 			};
 
-			const overService = overload.overloadServices(client, config);
+			const overService = overload.overloadServices(client, config, false);
 			let resultAsync = undefined;
 			let err!: Error;
 			try {

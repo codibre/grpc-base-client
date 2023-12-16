@@ -23,14 +23,24 @@ export class Client<T extends GrpcServiceDefinition<keyof T>> {
 
 	constructor(
 		config: ClientConfig<T> | ReflectedClientConfig<T>,
+		poolService?: typeof ClientPool,
+		reflected?: true,
+	);
+	constructor(
+		config: ClientConfig<T> | ReflectedClientConfig<T>,
+		poolService?: typeof ClientPool,
+	);
+	constructor(
+		config: ClientConfig<T> | ReflectedClientConfig<T>,
 		poolService = ClientPool,
+		reflected?: boolean,
 	) {
 		this.config = config;
 		if (config.maxConnections === 0) {
-			this.grpcInstance = this.createClient(config);
+			this.grpcInstance = this.createClient(config, reflected);
 		} else {
 			this.grpcInstance = poolService.create<T>(config, () =>
-				this.createClient(config),
+				this.createClient(config, reflected),
 			);
 		}
 	}
@@ -48,7 +58,7 @@ export class Client<T extends GrpcServiceDefinition<keyof T>> {
 		config: BaseClientConfig<T>,
 		poolService = ClientPool,
 	) {
-		const reflection = ReflectorProvider.getReflector<T>(config);
+		const { reflection } = await ReflectorProvider.getReflector<T>(config);
 		const descriptor = await reflection.getDescriptorBySymbol(
 			`${config.namespace}.${config.service}`,
 		);
@@ -64,7 +74,10 @@ export class Client<T extends GrpcServiceDefinition<keyof T>> {
 		);
 	}
 
-	private createClient(config: ClientConfig | ReflectedClientConfig<T>): T {
+	private createClient(
+		config: ClientConfig | ReflectedClientConfig<T>,
+		reflected: boolean | undefined,
+	): T {
 		const grpc = getGrpc(config.legacy);
 		const credentials =
 			grpc.credentials[config.secure ? 'createSsl' : 'createInsecure']();
@@ -88,7 +101,11 @@ export class Client<T extends GrpcServiceDefinition<keyof T>> {
 			credentials,
 			config.grpcOptions,
 		) as GrpcServiceClient;
-		const grpcClient = overloadServices(client, config) as unknown as T;
+		const grpcClient = overloadServices(
+			client,
+			config,
+			reflected,
+		) as unknown as T;
 		return grpcClient as unknown as T;
 	}
 

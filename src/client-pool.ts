@@ -55,7 +55,7 @@ export class ClientPool {
 
 		return connectionPool.proxy;
 	}
-	static getAlias(config: BaseClientConfig) {
+	static getAlias(config: Pick<BaseClientConfig, 'url'>) {
 		return `${config.url}~${
 			(config as ClientConfig).legacy ? 'legacy' : 'current'
 		}`;
@@ -83,5 +83,17 @@ export class ClientPool {
 		const newClient = pool.factory();
 		pool.connections[position] = newClient;
 		return pool.proxy;
+	}
+
+	public static renewAllConnections(config: Pick<BaseClientConfig, 'url'>) {
+		const alias = this.getAlias(config);
+		const pool = ClientPool.clientsPools.get(alias);
+		if (pool) {
+			for (let i = 0; i < pool.connections.length; i++) {
+				pool.connections[i]?.close();
+				const newClient = pool.factory();
+				pool.connections[i] = newClient;
+			}
+		}
 	}
 }

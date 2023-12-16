@@ -75,8 +75,32 @@ To use **getByReflection**, you need to install two optional libraries:
 * [grpc-js-reflection-client](https://www.npmjs.com/package/grpc-js-reflection-client)
 * [google-protobuf](https://www.npmjs.com/package/google-protobuf)
 
+## Auto updating reflected client
+
+If, for any reason, you update the server proto without restarting the clients, they'll stay with the old version until new the restart occurs. On way to fix that is adding the **x-proto-hash** to every server response. This will be used to identify automatically whether the server side proto has changed. This library offers a built-in function to generate that hash. So, to use it, you need to:
+
+* Install this library server side;
+* To generates the proto hash during application bootstrap;
+* Add the metadata **x-proto-hash**, passing the generated hash to every gRPC response;
+
+Here's an example of the command to generate the hash:
+
+```ts
+const protoHash = await getServerHash({
+  secure: false,
+  url: '0.0.0.0:8080',
+});
+```
+
+In this example, no certificate is used server side, so, secure is false. Notice that a local connection will be established in order to generate the hash. After having it, make sure to add it to every grpc response, like this:
+
+```ts
+const metadata = new grpc.Metadata() // create the metadata if not already crated
+metadata.add('x-proto-hash', protoHash);
+
+call.sendMetadata(metadata);
+```
+
 ## License
-
-
 
 Licensed under [MIT](https://en.wikipedia.org/wiki/MIT_License).
