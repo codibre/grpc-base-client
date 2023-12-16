@@ -5,6 +5,7 @@ import {
 	ClientReadableStream,
 	ClientWritableStream,
 	Client,
+	ServiceError,
 } from '@grpc/grpc-js';
 
 export interface GrpcAsyncIterable<T> extends FluentAsyncIterable<T> {
@@ -12,22 +13,22 @@ export interface GrpcAsyncIterable<T> extends FluentAsyncIterable<T> {
 }
 
 export interface RawUnaryCall<P, R> {
-	(param: P, callback: (err: Error, response: R) => void): void;
+	(param: P, callback: (err: ServiceError, response: R) => void): void;
 	(
 		param: P,
 		deadline: Partial<CallOptions> | undefined,
-		callback: (err: Error, response: R) => void,
+		callback: (err: ServiceError, response: R) => void,
 	): void;
 	(
 		param: P,
 		metadata: Metadata,
-		callback: (err: Error, response: R) => void,
+		callback: (err: ServiceError, response: R) => void,
 	): void;
 	(
 		param: P,
 		metadata: Metadata,
 		deadline: Partial<CallOptions> | undefined,
-		callback: (err: Error, response: R) => void,
+		callback: (err: ServiceError, response: R) => void,
 	): void;
 }
 
