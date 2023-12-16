@@ -1,3 +1,4 @@
+import { ReflectedClientConfig, BaseClientConfig } from './../client-config';
 import { fluentAsync, FluentAsyncIterable } from '@codibre/fluent-iterable';
 import {
 	GrpcServiceClient,
@@ -19,7 +20,7 @@ const panicStatuses = new Set<Status | undefined>([
 	Status.INTERNAL,
 ]);
 
-export function handlePanic(client: ServiceClient, config: ClientConfig) {
+export function handlePanic(client: ServiceClient, config: BaseClientConfig) {
 	if (config.noPanicControl !== true && config.maxConnections) {
 		ClientPool.renewConnect(config, client);
 	}
@@ -28,7 +29,7 @@ export function handlePanic(client: ServiceClient, config: ClientConfig) {
 function promisifyUnary<P, R>(
 	unaryCall: RawUnaryCall<P, R>,
 	client: ServiceClient,
-	config: ClientConfig,
+	config: BaseClientConfig,
 ): UnaryCall<P, R> {
 	return (param: P, ...args: unknown[]) =>
 		new Promise<R>((resolve, reject) =>
@@ -49,7 +50,7 @@ function promisifyUnary<P, R>(
 function getGrpcAsyncIterable<TService extends GrpcServiceClient>(
 	stream: ClientDuplexStream<unknown, unknown>,
 	client: TService,
-	config: ClientConfig<any>,
+	config: BaseClientConfig,
 ): FluentAsyncIterable<unknown> {
 	return fluentAsync(stream).catch((error) => {
 		if (panicStatuses.has(error?.code)) {
@@ -63,7 +64,7 @@ function applyPanicHandling<TService extends GrpcServiceClient>(
 	client: TService,
 	serviceName: string,
 	action: StreamCall<unknown, unknown>,
-	config: ClientConfig<any>,
+	config: BaseClientConfig,
 ) {
 	try {
 		client[serviceName as keyof TService] = ((...args: any) => {
@@ -90,7 +91,7 @@ function applyPromisify<TService extends GrpcServiceClient>(
 	client: TService,
 	serviceName: string,
 	action: any,
-	config: ClientConfig<any>,
+	config: BaseClientConfig,
 ) {
 	(client as any)[serviceName] = promisifyUnary(
 		action.bind(client),
@@ -101,10 +102,11 @@ function applyPromisify<TService extends GrpcServiceClient>(
 
 export function overloadServices<TService extends GrpcServiceClient>(
 	client: TService,
-	config: ClientConfig,
+	config: ClientConfig | ReflectedClientConfig,
 ): TService {
-	for (const serviceName in client.__proto__!) {
-		if (client.__proto__!.hasOwnProperty(serviceName)) {
+	const prototype = Object.getPrototypeOf(client);
+	for (const serviceName in prototype) {
+		if (prototype.hasOwnProperty(serviceName)) {
 			const action = client[serviceName] as any;
 			if (isGrpcFunction(action)) {
 				if (isStreamCall(action)) {

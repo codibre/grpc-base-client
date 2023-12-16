@@ -1,19 +1,30 @@
+import { ReflectorProvider } from './reflector-provider';
 import type { GrpcServiceClient, GrpcServiceDefinition } from './types';
-import type { ClientConfig } from './client-config';
+import type {
+	BaseClientConfig,
+	ClientConfig,
+	ReflectedClientConfig,
+} from './client-config';
 import type { GrpcObject, ServiceClientConstructor } from '@grpc/grpc-js';
-import type { Options as PackageOptions } from '@grpc/proto-loader';
+import {
+	loadFileDescriptorSetFromObject,
+	loadSync,
+	Options as PackageOptions,
+} from '@grpc/proto-loader';
 import { getGrpc } from './utils/grpc-lib';
-import { loadSync } from '@grpc/proto-loader';
 import { ClientPool } from './client-pool';
 import { overloadServices } from './utils/overload-services';
 
 export class Client<T extends GrpcServiceDefinition<keyof T>> {
 	private packageDefinition!: GrpcObject;
 	private grpcInstance: T;
-	readonly config: ClientConfig<T>;
+	readonly config: ClientConfig<T> | ReflectedClientConfig<T>;
 	public poolPosition?: number;
 
-	constructor(config: ClientConfig<T>, poolService = ClientPool) {
+	constructor(
+		config: ClientConfig<T> | ReflectedClientConfig<T>,
+		poolService = ClientPool,
+	) {
 		this.config = config;
 		if (config.maxConnections === 0) {
 			this.grpcInstance = this.createClient(config);
@@ -33,13 +44,34 @@ export class Client<T extends GrpcServiceDefinition<keyof T>> {
 		return new grpc.Metadata();
 	}
 
-	private createClient(config: ClientConfig): T {
+	public static async getByReflection<T extends GrpcServiceDefinition<keyof T>>(
+		config: BaseClientConfig<T>,
+		poolService = ClientPool,
+	) {
+		const reflection = ReflectorProvider.getReflector<T>(config);
+		const descriptor = await reflection.getDescriptorBySymbol(
+			`${config.namespace}.${config.service}`,
+		);
+		const proto = descriptor.getProtobufJsRoot().toDescriptor('3');
+
+		return new Client<T>(
+			{
+				...config,
+				proto,
+				legacy: false,
+			},
+			poolService,
+		);
+	}
+
+	private createClient(config: ClientConfig | ReflectedClientConfig<T>): T {
 		const grpc = getGrpc(config.legacy);
 		const credentials =
 			grpc.credentials[config.secure ? 'createSsl' : 'createInsecure']();
 
+		const proto = 'protoFile' in config ? config.protoFile : config.proto;
 		const grpcPackage = this.loadPackage(
-			config.protoFile,
+			proto,
 			config.PackageOptions,
 			config.legacy,
 		);
@@ -61,7 +93,7 @@ export class Client<T extends GrpcServiceDefinition<keyof T>> {
 	}
 
 	private loadPackage(
-		address: string,
+		path: string | protobuf.Root,
 		config: PackageOptions | undefined,
 		legacy: boolean | undefined,
 	): GrpcObject {
@@ -73,7 +105,10 @@ export class Client<T extends GrpcServiceDefinition<keyof T>> {
 				defaults: true,
 				...config,
 			};
-			const pkgDef = loadSync(address, conf);
+			const pkgDef =
+				typeof path === 'string'
+					? loadSync(path, conf)
+					: loadFileDescriptorSetFromObject(path);
 			this.packageDefinition = grpc.loadPackageDefinition(pkgDef);
 		}
 		return this.packageDefinition;
