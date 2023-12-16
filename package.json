@@ -74,20 +74,32 @@
   "bugs": {
     "url": "https://github.com/Codibre/grpc-base-client/issues"
   },
-  "keywords": [],
+  "keywords": ["grpc", "grpc-client", "grpc-reflection", "pool", "client", "api"],
   "license": "MIT",
   "peerDependencies": {
     "@grpc/grpc-js": "*",
     "@grpc/proto-loader": "*",
-    "grpc": "*"
+    "grpc": "*",
+    "grpc-js-reflection-client": "*",
+    "google-protobuf": "*"
   },
   "peerDependenciesMeta": {
     "grpc": {
+      "optional": true
+    },
+    "grpc-js-reflection-client": {
+      "optional": true
+    },
+    "google-protobuf": {
       "optional": true
     }
   },
   "devDependencies": {
     "@codibre/confs": "^1.1.2",
+    "@grpc/grpc-js": "^1.9.13",
+    "@grpc/proto-loader": "^0.7.10",
+    "@grpc/reflection": "^1.0.1",
+    "@types/google-protobuf": "^3.15.12",
     "@types/jest": "^27.4.1",
     "@typescript-eslint/eslint-plugin": "^4.0.0",
     "@typescript-eslint/parser": "^4.0.0",
@@ -96,7 +108,9 @@
     "eslint-config-prettier": "^7.0.0",
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-unused-imports": "^1.0.0",
-    "grpc": "^1.0.0",
+    "google-protobuf": "^3.21.2",
+    "grpc": "^1.24.11",
+    "grpc-js-reflection-client": "^1.2.11",
     "husky": "^7.0.4",
     "jest": "^27.5.1",
     "jest-callslike": "^0.2.0",
@@ -110,8 +124,6 @@
     "typescript": "^4.5.2"
   },
   "dependencies": {
-    "@codibre/fluent-iterable": "*",
-    "@grpc/grpc-js": "^1.3.1",
-    "@grpc/proto-loader": "^0.6.2"
+    "@codibre/fluent-iterable": "*"
   }
 }

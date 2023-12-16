@@ -9,6 +9,7 @@ import {
 	ServerWritableStream,
 } from '@grpc/grpc-js';
 import { loadSync } from '@grpc/proto-loader';
+import { ReflectionService } from '@grpc/reflection';
 
 interface TestRequest {
 	foo: string;
@@ -104,6 +105,8 @@ export async function createServer(
 			}
 		},
 	);
+	const reflection = new ReflectionService(proto);
+	reflection.addToServer(server);
 
 	return server;
 }

@@ -1,12 +1,12 @@
 import { Client } from '@grpc/grpc-js';
-import { ClientConfig } from './client-config';
+import { BaseClientConfig, ClientConfig } from './client-config';
 
 /* eslint-disable @typescript-eslint/no-shadow */
 type Con = Object;
 interface ConnectionPool {
 	position: number;
 	connections: any[];
-	config: ClientConfig;
+	config: BaseClientConfig;
 	factory: Function;
 	proxy?: any;
 }
@@ -30,7 +30,7 @@ function factoryPoolProxy(connectionPool: ConnectionPool): ConnectionPool {
 
 export class ClientPool {
 	private static clientsPools: Map<string, ConnectionPool> = new Map();
-	public static create<T>(config: ClientConfig, createClient: () => T): T {
+	public static create<T>(config: BaseClientConfig, createClient: () => T): T {
 		const alias = this.getAlias(config);
 		const size = config.maxConnections;
 		let connectionPool: ConnectionPool | undefined =
@@ -55,8 +55,10 @@ export class ClientPool {
 
 		return connectionPool.proxy;
 	}
-	static getAlias(config: ClientConfig<any>) {
-		return `${config.url}~${config.legacy ? 'legacy' : 'current'}`;
+	static getAlias(config: BaseClientConfig) {
+		return `${config.url}~${
+			(config as ClientConfig).legacy ? 'legacy' : 'current'
+		}`;
 	}
 
 	public static addConnection<T>(alias: string, createClient: () => T): T {
@@ -70,7 +72,7 @@ export class ClientPool {
 		return pool.proxy;
 	}
 
-	public static renewConnect<T>(config: ClientConfig, client: Client): T {
+	public static renewConnect<T>(config: BaseClientConfig, client: Client): T {
 		const alias = this.getAlias(config);
 		const position = (client as any).poolPosition;
 		const pool = ClientPool.clientsPools.get(alias);
