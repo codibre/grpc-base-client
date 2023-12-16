@@ -1,3 +1,10 @@
+# [2.3.0](https://github.com/Codibre/grpc-base-client/compare/v2.2.1...v2.3.0) (2023-12-16)
+
+
+### Features
+
+* implementing grpc reflection client ([#13](https://github.com/Codibre/grpc-base-client/issues/13)) ([00226b1](https://github.com/Codibre/grpc-base-client/commit/00226b13099fe3c160f9a34d4eae4e796557533d))
+
 ## [2.2.1](https://github.com/Codibre/grpc-base-client/compare/v2.2.0...v2.2.1) (2023-02-15)
 
 

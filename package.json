@@ -1,7 +1,7 @@
 {
   "name": "grpc-base-client",
   "description": "This project is a Library base for construct gRPC clients",
-  "version": "2.2.1",
+  "version": "2.3.0",
   "private": false,
   "author": {
     "name": "Gustavo S. Rodrigues <gustavo.beavis@gmail.com>"
@@ -74,7 +74,14 @@
   "bugs": {
     "url": "https://github.com/Codibre/grpc-base-client/issues"
   },
-  "keywords": ["grpc", "grpc-client", "grpc-reflection", "pool", "client", "api"],
+  "keywords": [
+    "grpc",
+    "grpc-client",
+    "grpc-reflection",
+    "pool",
+    "client",
+    "api"
+  ],
   "license": "MIT",
   "peerDependencies": {
     "@grpc/grpc-js": "*",
